@@ -4,6 +4,10 @@ import { useFormik } from "formik"
 import * as Yup from "yup"
 import toast, { Toaster } from "react-hot-toast"
 
+import { Loading } from "../components/Loading"
+
+import "../styles/empresas.scss"
+
 type apiEmpresa = Record<
   string,
   {
@@ -25,11 +29,18 @@ export function Empresas() {
   const [editId, setEditId] = useState(0)
   const [addModal, setAddModal] = useState(false)
 
-  const handleShowAddModal = () => setAddModal(true)
-  const handleCloseAddModal = () => {
-    setAddModal(false)
-    formik.resetForm()
-  }
+  useEffect(() => {
+    if (!addModal) {
+      loadEmpresas()
+    }
+  }, [addModal])
+
+  const search = useFormik({
+    initialValues: {
+      searchCriteria: "",
+    },
+    onSubmit: () => {},
+  })
 
   const formik = useFormik({
     initialValues: {
@@ -48,11 +59,11 @@ export function Empresas() {
     },
   })
 
-  useEffect(() => {
-    if (!addModal) {
-      loadEmpresas()
-    }
-  }, [addModal])
+  const handleShowAddModal = () => setAddModal(true)
+  const handleCloseAddModal = () => {
+    setAddModal(false)
+    formik.resetForm()
+  }
 
   async function loadEmpresas() {
     const response = await fetch("api/Empresas")
@@ -68,7 +79,7 @@ export function Empresas() {
     setLoaded(true)
   }
 
-  async function handleSave(values: Object) {
+  async function handleSave(empresa: Object) {
     let requestData
     let response
     let msg
@@ -76,7 +87,7 @@ export function Empresas() {
     if (editId > 0) {
       requestData = JSON.stringify({
         ...{ id: +editId },
-        ...values,
+        ...empresa,
       })
       response = await fetch("api/Empresas/" + editId, {
         method: "PUT",
@@ -86,7 +97,7 @@ export function Empresas() {
       msg = "editada"
       setEditId(0)
     } else {
-      requestData = JSON.stringify(values)
+      requestData = JSON.stringify(empresa)
       response = await fetch("api/Empresas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,44 +134,60 @@ export function Empresas() {
   if (loaded) {
     return (
       <div id="empresasPage" className="flex-grow-1">
-        <div className="container-fluid d-flex" style={{ width: "100%" }}>
+        <div className="container-fluid d-flex flex-column py-3">
           <Toaster />
-
-          <div className="flex-grow-1">
-            <Button variant="outline-success" onClick={handleShowAddModal}>
+          <div className="d-flex justify-content-between mb-3">
+            <Button variant="success" onClick={handleShowAddModal}>
               Nova Empresa
             </Button>
 
-            <Table variant="light" bordered>
-              <thead>
-                <tr className="table-dark">
-                  <th>ID</th>
-                  <th>CNPJ</th>
-                  <th>Razão Social</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody>
-                {empresas.map((empresa) => (
-                  <tr key={empresa.id}>
-                    <td>{empresa.id}</td>
-                    <td>{empresa.cnpj}</td>
-                    <td>{empresa.razaoSocial}</td>
+            <Form.Control
+              id="searchCriteria"
+              name="searchCriteria"
+              type="text"
+              onChange={search.handleChange}
+              onBlur={search.handleBlur}
+              placeholder="Pesquisar"
+              value={search.values.searchCriteria}></Form.Control>
+          </div>
+
+          <Table borderless variant="light">
+            <thead>
+              <tr className="table-dark">
+                <th>ID</th>
+                <th>CNPJ</th>
+                <th>Razão Social</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {empresas
+                .filter((empresa) => empresa.cnpj.startsWith(search.values.searchCriteria))
+                .map((empresaFiltro) => (
+                  <tr key={empresaFiltro.id}>
+                    <td>{empresaFiltro.id}</td>
+                    <td>{empresaFiltro.cnpj}</td>
+                    <td>{empresaFiltro.razaoSocial}</td>
                     <td>
                       <ButtonGroup>
-                        <Button size="sm" variant="primary" onClick={() => handleEdit(empresa)}>
+                        <Button
+                          size="sm"
+                          variant="primary"
+                          onClick={() => handleEdit(empresaFiltro)}>
                           Editar
                         </Button>
-                        <Button size="sm" variant="danger" onClick={() => handleDelete(empresa.id)}>
+                        <Button
+                          size="sm"
+                          variant="danger"
+                          onClick={() => handleDelete(empresaFiltro.id)}>
                           Excluir
                         </Button>
                       </ButtonGroup>
                     </td>
                   </tr>
                 ))}
-              </tbody>
-            </Table>
-          </div>
+            </tbody>
+          </Table>
 
           <Modal show={addModal} onHide={handleCloseAddModal}>
             <Modal.Header className="d-flex justify-content-center">
@@ -196,7 +223,7 @@ export function Empresas() {
               </Form>
             </Modal.Body>
             <Modal.Footer>
-              <Button variant="primary" onClick={formik.handleReset}>
+              <Button variant="secondary" onClick={formik.handleReset}>
                 Limpar
               </Button>
               <Button variant="primary" onClick={() => formik.handleSubmit()}>
@@ -208,6 +235,6 @@ export function Empresas() {
       </div>
     )
   } else {
-    return <h1>Carregando...</h1>
+    return <Loading />
   }
 }
