@@ -10,9 +10,10 @@ namespace teste_tria.Models
     {
         public Context(DbContextOptions<Context> options) : base(options)
         {
-            DBInit.Initialize(this);
+            
         }
 
         public DbSet<Empresa> Empresas { get; set; }
+        public DbSet<Cliente> Clientes { get; set; }
     }
 }
