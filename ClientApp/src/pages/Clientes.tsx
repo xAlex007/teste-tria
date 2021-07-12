@@ -101,6 +101,7 @@ export function Clientes() {
     setLoaded(true)
   }
 
+  //Consulta realizada ao servidor
   async function handleSearch(pesquisa: SearchObj) {
     const response = await fetch(
       "api/Clientes/Search/" + pesquisa.searchBy + "/" + pesquisa.searchCriteria
@@ -166,14 +167,22 @@ export function Clientes() {
   }
 
   async function handleDelete(clienteId: number) {
-    await fetch("api/Clientes/" + clienteId, {
+    const response = await fetch("api/Clientes/" + clienteId, {
       method: "DELETE",
     })
-    setClientes(
-      clientes.filter((data) => {
-        return data.id !== clienteId
-      })
-    )
+    const result = await response.json()
+    if (result === true) {
+      toast.success("Cliente excluído com suceso!")
+      setClientes(
+        clientes.filter((data) => {
+          return data.id !== clienteId
+        })
+      )
+    } else {
+      response.status === 200
+        ? toast.error("Erro ao processar a solicitação.")
+        : toast.error("Erro " + response.status.toString())
+    }
   }
 
   if (loaded) {

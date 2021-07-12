@@ -35,6 +35,7 @@ export function Empresas() {
     }
   }, [addModal])
 
+  //Consulta realizada diretamente no front-end
   const search = useFormik({
     initialValues: {
       searchCriteria: "",

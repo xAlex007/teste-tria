@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
@@ -26,5 +27,7 @@ namespace teste_tria.Models
         [Required(ErrorMessage = "A data de criação não pode estar em branco")]
         [DisplayName("Data de Criação")]
         public DateTime DtCriacao { get; set; }
+
+        public ICollection<ClienteEmpresa> ClienteEmpresas { get; set; }
     }
 }

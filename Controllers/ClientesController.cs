@@ -11,7 +11,7 @@ namespace teste_tria.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClientesController : ControllerBase
+    public class ClientesController : Controller
     {
         private readonly Context _context;
 
@@ -56,13 +56,13 @@ namespace teste_tria.Controllers
             }
 
             return cliente;
-        }        
+        }
 
         // PUT: api/Clientes/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutCliente(long id, Cliente cliente)
+        public async Task<ActionResult<Cliente>> PutCliente(long id, Cliente cliente)
         {
             if (id != cliente.Id)
             {
@@ -87,7 +87,7 @@ namespace teste_tria.Controllers
                 }
             }
 
-            return NoContent();
+            return cliente;
         }
 
         // POST: api/Clientes
@@ -109,9 +109,11 @@ namespace teste_tria.Controllers
             return CreatedAtAction("GetCliente", new { id = cliente.Id }, cliente);
         }
 
+        //Aqui a ação original foi modificada para retornar um booleano de acordo
+        //com o resultado da ação. Originalmente retornava o objeto cliente deletado.
         // DELETE: api/Clientes/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Cliente>> DeleteCliente(long id)
+        public async Task<ActionResult<Boolean>> DeleteCliente(long id)
         {
             var cliente = await _context.Clientes.FindAsync(id);
             if (cliente == null)
@@ -119,10 +121,14 @@ namespace teste_tria.Controllers
                 return NotFound();
             }
 
-            _context.Clientes.Remove(cliente);
-            await _context.SaveChangesAsync();
-
-            return cliente;
+            try{
+                _context.Clientes.Remove(cliente);
+                await _context.SaveChangesAsync();
+                return Json(true);
+            }catch(Exception ex){
+                Console.WriteLine(ex);
+                return Json(false);
+            }
         }
 
         private bool ClienteExists(long id)

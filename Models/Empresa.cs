@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using System.Collections.Generic;
+using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 
 namespace teste_tria.Models
@@ -17,5 +18,7 @@ namespace teste_tria.Models
         [DisplayName("Razão Social")]
         [StringLength(150, MinimumLength = 4)]
         public string RazaoSocial { get; set; }
+
+        public ICollection<ClienteEmpresa> ClienteEmpresas { get; set; }
     }
 }
