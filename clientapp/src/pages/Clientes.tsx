@@ -1,48 +1,56 @@
-import { useEffect, useState } from "react"
-import { Button, ButtonGroup, Modal, Form, Table, InputGroup, Dropdown } from "react-bootstrap"
-import { useFormik } from "formik"
-import * as Yup from "yup"
-import toast, { Toaster } from "react-hot-toast"
+import { useEffect, useState } from "react";
+import {
+  Button,
+  ButtonGroup,
+  Modal,
+  Form,
+  Table,
+  InputGroup,
+  Dropdown,
+} from "react-bootstrap";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import toast from "react-hot-toast";
 
-import { Loading } from "../components/Loading"
+import { Loading } from "../components/Loading";
 
-import "../styles/empresas.scss"
+import "../styles/empresas.scss";
 
 type apiCliente = Record<
   string,
   {
-    id: number
-    cpf: string
-    nome: string
-    email: string
-    dtCriacao: Date
+    id: number;
+    cpf: string;
+    nome: string;
+    email: string;
+    dtCriacao: Date;
   }
->
+>;
 
 type Cliente = {
-  id: number
-  cpf: string
-  nome: string
-  email: string
-  dtCriacao: Date
-}
+  id: number;
+  cpf: string;
+  nome: string;
+  email: string;
+  dtCriacao: Date;
+};
 
 type SearchObj = {
-  searchBy: string
-  searchCriteria: string
-}
+  searchBy: string;
+  searchCriteria: string;
+};
 
 export function Clientes() {
-  const [loaded, setLoaded] = useState(false)
-  const [clientes, setClientes] = useState<Cliente[]>([])
-  const [editId, setEditId] = useState(0)
-  const [addModal, setAddModal] = useState(false)
+  const [loaded, setLoaded] = useState(false);
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [editId, setEditId] = useState(0);
+  const [addModal, setAddModal] = useState(false);
 
   useEffect(() => {
     if (!addModal) {
-      loadClientes()
+      loadClientes();
     }
-  }, [addModal])
+  }, [addModal]);
 
   const search = useFormik({
     initialValues: {
@@ -50,15 +58,15 @@ export function Clientes() {
       searchCriteria: "",
     },
     onSubmit: (values: SearchObj) => {
-      handleSearch(values)
+      handleSearch(values);
     },
-  })
+  });
 
   useEffect(() => {
     if (search.values.searchCriteria === "") {
-      loadClientes()
+      loadClientes();
     }
-  }, [search.values.searchCriteria])
+  }, [search.values.searchCriteria]);
 
   const formik = useFormik({
     initialValues: {
@@ -67,27 +75,31 @@ export function Clientes() {
       email: "",
     },
     validationSchema: Yup.object({
-      cpf: Yup.string().length(11, "Formato inválido").required("Campo obrigatório"),
+      cpf: Yup.string()
+        .length(11, "Formato inválido")
+        .required("Campo obrigatório"),
       nome: Yup.string()
         .min(4, "Nome muito curto")
         .max(200, "Nome muito longo")
         .required("Campo obrigatório"),
-      email: Yup.string().email("E-mail inválido").max(150, "E-mail muito longo"),
+      email: Yup.string()
+        .email("E-mail inválido")
+        .max(150, "E-mail muito longo"),
     }),
     onSubmit: (values) => {
-      handleSave(values)
+      handleSave(values);
     },
-  })
+  });
 
-  const handleShowAddModal = () => setAddModal(true)
+  const handleShowAddModal = () => setAddModal(true);
   const handleCloseAddModal = () => {
-    setAddModal(false)
-    formik.resetForm()
-  }
+    setAddModal(false);
+    formik.resetForm();
+  };
 
   async function loadClientes() {
-    const response = await fetch("api/Clientes")
-    const apiClientes: apiCliente = await response.json()
+    const response = await fetch("api/Clientes");
+    const apiClientes: apiCliente = await response.json();
     const parsedClientes = Object.entries(apiClientes).map(([key, value]) => {
       return {
         id: value.id,
@@ -95,17 +107,17 @@ export function Clientes() {
         nome: value.nome,
         email: value.email,
         dtCriacao: value.dtCriacao,
-      }
-    })
-    setClientes(parsedClientes)
-    setLoaded(true)
+      };
+    });
+    setClientes(parsedClientes);
+    setLoaded(true);
   }
 
   async function handleSearch(pesquisa: SearchObj) {
     const response = await fetch(
       "api/Clientes/Search/" + pesquisa.searchBy + "/" + pesquisa.searchCriteria
-    )
-    const apiClientes: apiCliente = await response.json()
+    );
+    const apiClientes: apiCliente = await response.json();
     const parsedClientes = Object.entries(apiClientes).map(([key, value]) => {
       return {
         id: value.id,
@@ -113,15 +125,15 @@ export function Clientes() {
         nome: value.nome,
         email: value.email,
         dtCriacao: value.dtCriacao,
-      }
-    })
-    setClientes(parsedClientes)
+      };
+    });
+    setClientes(parsedClientes);
   }
 
   async function handleSave(cliente: Object) {
-    let requestData
-    let response
-    let msg
+    let requestData;
+    let response;
+    let msg;
 
     if (editId > 0) {
       requestData = JSON.stringify({
@@ -132,55 +144,54 @@ export function Clientes() {
             .filter((clientes) => clientes.id === editId)
             .map((filtrado) => filtrado.dtCriacao)[0],
         },
-      })
+      });
       response = await fetch("api/Clientes/" + editId, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: requestData,
-      })
-      msg = "editado"
-      setEditId(0)
+      });
+      msg = "editado";
+      setEditId(0);
     } else {
-      requestData = JSON.stringify(cliente)
+      requestData = JSON.stringify(cliente);
       response = await fetch("api/Clientes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: requestData,
-      })
-      msg = "criado"
+      });
+      msg = "criado";
     }
 
-    handleCloseAddModal()
-    await new Promise((f) => setTimeout(f, 100))
+    handleCloseAddModal();
+    await new Promise((f) => setTimeout(f, 100));
     response.ok
       ? toast.success("Cliente " + msg + " com suceso!")
-      : toast.error("Erro " + response.status.toString())
+      : toast.error("Erro " + response.status.toString());
   }
 
   function handleEdit(cliente: Cliente) {
-    setEditId(cliente.id)
-    formik.setFieldValue("cpf", cliente.cpf)
-    formik.setFieldValue("nome", cliente.nome)
-    formik.setFieldValue("email", cliente.email)
-    handleShowAddModal()
+    setEditId(cliente.id);
+    formik.setFieldValue("cpf", cliente.cpf);
+    formik.setFieldValue("nome", cliente.nome);
+    formik.setFieldValue("email", cliente.email);
+    handleShowAddModal();
   }
 
   async function handleDelete(clienteId: number) {
     await fetch("api/Clientes/" + clienteId, {
       method: "DELETE",
-    })
+    });
     setClientes(
       clientes.filter((data) => {
-        return data.id !== clienteId
+        return data.id !== clienteId;
       })
-    )
+    );
   }
 
   if (loaded) {
     return (
       <div id="empresasPage" className="flex-grow-1">
         <div className="container-fluid d-flex flex-column py-3">
-          <Toaster />
           <div className="d-flex justify-content-between mb-3">
             <Button variant="success" onClick={handleShowAddModal}>
               Novo Cliente
@@ -198,14 +209,16 @@ export function Clientes() {
                     label="Nome"
                     value="Nome"
                     checked={search.values.searchBy === "Nome"}
-                    onChange={search.handleChange}></Form.Check>
+                    onChange={search.handleChange}
+                  ></Form.Check>
                   <Form.Check
                     name="searchBy"
                     type="radio"
                     label="CPF"
                     value="CPF"
                     checked={search.values.searchBy === "CPF"}
-                    onChange={search.handleChange}></Form.Check>
+                    onChange={search.handleChange}
+                  ></Form.Check>
                 </Dropdown.Menu>
               </Dropdown>
               <Form.Control
@@ -215,15 +228,21 @@ export function Clientes() {
                 onChange={search.handleChange}
                 onBlur={search.handleBlur}
                 placeholder={"Pesquisar por " + search.values.searchBy}
-                value={search.values.searchCriteria}></Form.Control>
-              <Button type="submit" variant="outline-primary" onClick={() => search.handleSubmit()}>
+                value={search.values.searchCriteria}
+              ></Form.Control>
+              <Button
+                type="submit"
+                variant="outline-primary"
+                onClick={() => search.handleSubmit()}
+              >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="16"
                   height="16"
                   fill="currentColor"
                   className="bi bi-search"
-                  viewBox="0 0 16 16">
+                  viewBox="0 0 16 16"
+                >
                   <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z" />
                 </svg>
               </Button>
@@ -251,10 +270,18 @@ export function Clientes() {
                   <td>{new Date(cliente.dtCriacao).toLocaleDateString()}</td>
                   <td>
                     <ButtonGroup>
-                      <Button size="sm" variant="primary" onClick={() => handleEdit(cliente)}>
+                      <Button
+                        size="sm"
+                        variant="primary"
+                        onClick={() => handleEdit(cliente)}
+                      >
                         Editar
                       </Button>
-                      <Button size="sm" variant="danger" onClick={() => handleDelete(cliente.id)}>
+                      <Button
+                        size="sm"
+                        variant="danger"
+                        onClick={() => handleDelete(cliente.id)}
+                      >
                         Excluir
                       </Button>
                     </ButtonGroup>
@@ -278,9 +305,12 @@ export function Clientes() {
                     type="text"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    value={formik.values.cpf}></Form.Control>
+                    value={formik.values.cpf}
+                  ></Form.Control>
                   {formik.touched.cpf && formik.errors.cpf && (
-                    <div className="fst-italic fw-bold text-danger">{formik.errors.cpf}</div>
+                    <div className="fst-italic fw-bold text-danger">
+                      {formik.errors.cpf}
+                    </div>
                   )}
                 </Form.Group>
 
@@ -292,9 +322,12 @@ export function Clientes() {
                     type="text"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    value={formik.values.nome}></Form.Control>
+                    value={formik.values.nome}
+                  ></Form.Control>
                   {formik.touched.nome && formik.errors.nome && (
-                    <div className="fst-italic fw-bold text-danger">{formik.errors.nome}</div>
+                    <div className="fst-italic fw-bold text-danger">
+                      {formik.errors.nome}
+                    </div>
                   )}
                 </Form.Group>
 
@@ -306,9 +339,12 @@ export function Clientes() {
                     type="email"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    value={formik.values.email}></Form.Control>
+                    value={formik.values.email}
+                  ></Form.Control>
                   {formik.touched.email && formik.errors.email && (
-                    <div className="fst-italic fw-bold text-danger">{formik.errors.email}</div>
+                    <div className="fst-italic fw-bold text-danger">
+                      {formik.errors.email}
+                    </div>
                   )}
                 </Form.Group>
               </Form>
@@ -324,8 +360,8 @@ export function Clientes() {
           </Modal>
         </div>
       </div>
-    )
+    );
   } else {
-    return <Loading />
+    return <Loading />;
   }
 }
