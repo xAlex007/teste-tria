@@ -98,6 +98,7 @@ export function Empresas() {
       setEditId(0)
     } else {
       requestData = JSON.stringify(empresa)
+      console.log(requestData)
       response = await fetch("api/Empresas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,7 +205,9 @@ export function Empresas() {
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
                     value={formik.values.cnpj}></Form.Control>
-                  {formik.touched.cnpj && formik.errors.cnpj && <div>{formik.errors.cnpj}</div>}
+                  {formik.touched.cnpj && formik.errors.cnpj && (
+                    <div className="fst-italic fw-bold text-danger">{formik.errors.cnpj}</div>
+                  )}
                 </Form.Group>
 
                 <Form.Group>
@@ -217,7 +220,9 @@ export function Empresas() {
                     onBlur={formik.handleBlur}
                     value={formik.values.razaoSocial}></Form.Control>
                   {formik.touched.razaoSocial && formik.errors.razaoSocial && (
-                    <div>{formik.errors.razaoSocial}</div>
+                    <div className="fst-italic fw-bold text-danger">
+                      {formik.errors.razaoSocial}
+                    </div>
                   )}
                 </Form.Group>
               </Form>

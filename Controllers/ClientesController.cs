@@ -24,7 +24,24 @@ namespace teste_tria.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Cliente>>> GetClientes()
         {
-            return await _context.Clientes.ToListAsync();
+            return await _context.Clientes.ToListAsync();            
+        }
+
+        //GET: api/Clientes/Search/CPF/5
+        //GET: api/Clientes/Search/Nome/A
+        [HttpGet("Search/CPF/{cpf}")]
+        [HttpGet("Search/Nome/{nome}")]
+        public async Task<ActionResult<IEnumerable<Cliente>>> SearchClientes([FromRoute]string cpf, [FromRoute]string nome)
+        {
+            if (!(cpf == null && nome == null)){
+                if (cpf != null){
+                    return await _context.Clientes.Where(cliente => cliente.CPF.StartsWith(cpf)).ToListAsync();
+                }else{
+                    return await _context.Clientes.Where(cliente => cliente.Nome.StartsWith(nome)).ToListAsync();
+                }
+            }else{
+                return BadRequest();
+            }
         }
 
         // GET: api/Clientes/5
@@ -39,7 +56,7 @@ namespace teste_tria.Controllers
             }
 
             return cliente;
-        }
+        }        
 
         // PUT: api/Clientes/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
@@ -77,8 +94,15 @@ namespace teste_tria.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Cliente>> PostCliente(Cliente cliente)
+        public async Task<ActionResult<Cliente>> PostCliente(ApiCliente apicliente)
         {
+            Cliente cliente = new Cliente{
+                Id = apicliente.Id,
+                CPF = apicliente.CPF,
+                Nome = apicliente.Nome,
+                Email= apicliente.Email,
+                DtCriacao = DateTime.Now
+            };
             _context.Clientes.Add(cliente);
             await _context.SaveChangesAsync();
 
