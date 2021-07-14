@@ -5,6 +5,7 @@
 <code>npx create-react-app --template typescript</code>
 
 <h3>Bibliotecas .NET:</h3>
+
 * <code>dotnet add package Pomelo.EntityFrameworkCore.MySql --version 3.1.2</code>
 * <code>dotnet add package Pomelo.EntityFrameworkCore.MySql.Design --version 1.1.2</code>
 * <code>dotnet add package Microsoft.EntityFrameworkCore.Tools --version 3.1.16</code>
