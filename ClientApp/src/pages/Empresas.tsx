@@ -1,30 +1,28 @@
-import { useEffect, useState } from "react"
-import { Button, ButtonGroup, Modal, Form, Table } from "react-bootstrap"
-import { useFormik } from "formik"
-import * as Yup from "yup"
-import toast from "react-hot-toast"
+import { useEffect, useState } from "react";
+import { Button, ButtonGroup, Modal, Form, Table } from "react-bootstrap";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import toast from "react-hot-toast";
 
-import { useEmpresas } from "../hooks/useEmpresas"
+import { useEmpresas } from "../hooks/useEmpresas";
 
-import { Loading } from "../components/Loading"
-
-import "../styles/empresas.scss"
+import { Loading } from "../components/Loading";
 
 type Empresa = {
-  id: number
-  cnpj: string
-  razaoSocial: string
-}
+  id: number;
+  cnpj: string;
+  razaoSocial: string;
+};
 
 export function Empresas() {
-  const [empresas, setEmpresas] = useState<Empresa[]>([])
-  const [editId, setEditId] = useState(0)
-  const [addModal, setAddModal] = useState(false)
-  const { fetchedEmpresas, loaded } = useEmpresas(addModal)
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [editId, setEditId] = useState(0);
+  const [addModal, setAddModal] = useState(false);
+  const { fetchedEmpresas, loaded } = useEmpresas(addModal);
 
   useEffect(() => {
-    setEmpresas(fetchedEmpresas)
-  }, [fetchedEmpresas])
+    setEmpresas(fetchedEmpresas);
+  }, [fetchedEmpresas]);
 
   //Consulta realizada diretamente no front-end
   const search = useFormik({
@@ -32,7 +30,7 @@ export function Empresas() {
       searchCriteria: "",
     },
     onSubmit: () => {},
-  })
+  });
 
   const formik = useFormik({
     initialValues: {
@@ -40,79 +38,81 @@ export function Empresas() {
       razaoSocial: "",
     },
     validationSchema: Yup.object({
-      cnpj: Yup.string().length(14, "Formato inválido").required("Campo obrigatório"),
+      cnpj: Yup.string()
+        .length(14, "Formato inválido")
+        .required("Campo obrigatório"),
       razaoSocial: Yup.string()
         .min(4, "Nome muito curto")
         .max(150, "Nome muito longo")
         .required("Campo obrigatório"),
     }),
     onSubmit: (values) => {
-      handleSave(values)
+      handleSave(values);
     },
-  })
+  });
 
-  const handleShowAddModal = () => setAddModal(true)
+  const handleShowAddModal = () => setAddModal(true);
   const handleCloseAddModal = () => {
-    setAddModal(false)
-    formik.resetForm()
-  }
+    setAddModal(false);
+    formik.resetForm();
+  };
 
   async function handleSave(empresa: Object) {
-    let requestData
-    let response
-    let msg
+    let requestData;
+    let response;
+    let msg;
 
     if (editId > 0) {
       requestData = JSON.stringify({
         ...{ id: +editId },
         ...empresa,
-      })
+      });
       response = await fetch("api/Empresas/" + editId, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: requestData,
-      })
-      msg = "editada"
-      setEditId(0)
+      });
+      msg = "editada";
+      setEditId(0);
     } else {
-      requestData = JSON.stringify(empresa)
-      console.log(requestData)
+      requestData = JSON.stringify(empresa);
+      console.log(requestData);
       response = await fetch("api/Empresas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: requestData,
-      })
-      msg = "criada"
+      });
+      msg = "criada";
     }
 
-    handleCloseAddModal()
-    await new Promise((f) => setTimeout(f, 100))
+    handleCloseAddModal();
+    await new Promise((f) => setTimeout(f, 100));
     response.ok
       ? toast.success("Empresa " + msg + " com suceso!")
-      : toast.error("Erro " + response.status.toString())
+      : toast.error("Erro " + response.status.toString());
   }
 
   function handleEdit(empresa: Empresa) {
-    setEditId(empresa.id)
-    formik.setFieldValue("cnpj", empresa.cnpj)
-    formik.setFieldValue("razaoSocial", empresa.razaoSocial)
-    handleShowAddModal()
+    setEditId(empresa.id);
+    formik.setFieldValue("cnpj", empresa.cnpj);
+    formik.setFieldValue("razaoSocial", empresa.razaoSocial);
+    handleShowAddModal();
   }
 
   async function handleDelete(empresaId: number) {
     await fetch("api/Empresas/" + empresaId, {
       method: "DELETE",
-    })
+    });
     setEmpresas(
       empresas.filter((data) => {
-        return data.id !== empresaId
+        return data.id !== empresaId;
       })
-    )
+    );
   }
 
   if (loaded) {
     return (
-      <div id="empresasPage" className="flex-grow-1">
+      <div id="page" className="flex-grow-1">
         <div className="container-fluid d-flex flex-column py-3">
           <div className="d-flex justify-content-between mb-3">
             <Button variant="success" onClick={handleShowAddModal}>
@@ -126,7 +126,8 @@ export function Empresas() {
               onChange={search.handleChange}
               onBlur={search.handleBlur}
               placeholder="Pesquisar"
-              value={search.values.searchCriteria}></Form.Control>
+              value={search.values.searchCriteria}
+            ></Form.Control>
           </div>
 
           <Table borderless variant="light">
@@ -140,7 +141,9 @@ export function Empresas() {
             </thead>
             <tbody>
               {empresas
-                .filter((empresa) => empresa.cnpj.startsWith(search.values.searchCriteria))
+                .filter((empresa) =>
+                  empresa.cnpj.startsWith(search.values.searchCriteria)
+                )
                 .map((empresaFiltro) => (
                   <tr key={empresaFiltro.id}>
                     <td>{empresaFiltro.id}</td>
@@ -151,13 +154,15 @@ export function Empresas() {
                         <Button
                           size="sm"
                           variant="primary"
-                          onClick={() => handleEdit(empresaFiltro)}>
+                          onClick={() => handleEdit(empresaFiltro)}
+                        >
                           Editar
                         </Button>
                         <Button
                           size="sm"
                           variant="danger"
-                          onClick={() => handleDelete(empresaFiltro.id)}>
+                          onClick={() => handleDelete(empresaFiltro.id)}
+                        >
                           Excluir
                         </Button>
                       </ButtonGroup>
@@ -181,9 +186,12 @@ export function Empresas() {
                     type="text"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    value={formik.values.cnpj}></Form.Control>
+                    value={formik.values.cnpj}
+                  ></Form.Control>
                   {formik.touched.cnpj && formik.errors.cnpj && (
-                    <div className="fst-italic fw-bold text-danger">{formik.errors.cnpj}</div>
+                    <div className="fst-italic fw-bold text-danger">
+                      {formik.errors.cnpj}
+                    </div>
                   )}
                 </Form.Group>
 
@@ -195,7 +203,8 @@ export function Empresas() {
                     type="text"
                     onChange={formik.handleChange}
                     onBlur={formik.handleBlur}
-                    value={formik.values.razaoSocial}></Form.Control>
+                    value={formik.values.razaoSocial}
+                  ></Form.Control>
                   {formik.touched.razaoSocial && formik.errors.razaoSocial && (
                     <div className="fst-italic fw-bold text-danger">
                       {formik.errors.razaoSocial}
@@ -215,8 +224,8 @@ export function Empresas() {
           </Modal>
         </div>
       </div>
-    )
+    );
   } else {
-    return <Loading />
+    return <Loading />;
   }
 }
