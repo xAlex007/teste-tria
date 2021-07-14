@@ -5,16 +5,17 @@
 <code>npx create-react-app --template typescript</code>
 
 <h3>Bibliotecas .NET:</h3>
-<code>dotnet add package Pomelo.EntityFrameworkCore.MySql --version 3.1.2</code>
-<code>dotnet add package Pomelo.EntityFrameworkCore.MySql.Design --version 1.1.2</code>
-<code>dotnet add package Microsoft.EntityFrameworkCore.Tools --version 3.1.16</code>
+* <code>dotnet add package Pomelo.EntityFrameworkCore.MySql --version 3.1.2</code>
+* <code>dotnet add package Pomelo.EntityFrameworkCore.MySql.Design --version 1.1.2</code>
+* <code>dotnet add package Microsoft.EntityFrameworkCore.Tools --version 3.1.16</code>
 
 <h3>Dependências Node:</h3>
-<code>yarn add react-router-dom</code>
-<code>yarn add react-bootstrap</code>
-<code>yarn add formik</code>
-<code>yarn add yup</code>
-<code>yarn add react-hot-toast</code>
+
+* <code>yarn add react-router-dom</code>
+* <code>yarn add react-bootstrap</code>
+* <code>yarn add formik</code>
+* <code>yarn add yup</code>
+* <code>yarn add react-hot-toast</code>
 
 <h3>Execução:</h3>
 
