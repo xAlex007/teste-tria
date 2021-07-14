@@ -4,18 +4,11 @@ import { useFormik } from "formik"
 import * as Yup from "yup"
 import toast from "react-hot-toast"
 
+import { useEmpresas } from "../hooks/useEmpresas"
+
 import { Loading } from "../components/Loading"
 
 import "../styles/empresas.scss"
-
-type apiEmpresa = Record<
-  string,
-  {
-    id: number
-    cnpj: string
-    razaoSocial: string
-  }
->
 
 type Empresa = {
   id: number
@@ -24,16 +17,14 @@ type Empresa = {
 }
 
 export function Empresas() {
-  const [loaded, setLoaded] = useState(false)
   const [empresas, setEmpresas] = useState<Empresa[]>([])
   const [editId, setEditId] = useState(0)
   const [addModal, setAddModal] = useState(false)
+  const { fetchedEmpresas, loaded } = useEmpresas(addModal)
 
   useEffect(() => {
-    if (!addModal) {
-      loadEmpresas()
-    }
-  }, [addModal])
+    setEmpresas(fetchedEmpresas)
+  }, [fetchedEmpresas])
 
   //Consulta realizada diretamente no front-end
   const search = useFormik({
@@ -64,20 +55,6 @@ export function Empresas() {
   const handleCloseAddModal = () => {
     setAddModal(false)
     formik.resetForm()
-  }
-
-  async function loadEmpresas() {
-    const response = await fetch("api/Empresas")
-    const apiEmpresas: apiEmpresa = await response.json()
-    const parsedEmpresas = Object.entries(apiEmpresas).map(([key, value]) => {
-      return {
-        id: value.id,
-        cnpj: value.cnpj,
-        razaoSocial: value.razaoSocial,
-      }
-    })
-    setEmpresas(parsedEmpresas)
-    setLoaded(true)
   }
 
   async function handleSave(empresa: Object) {

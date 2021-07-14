@@ -4,6 +4,8 @@ import { useFormik } from "formik"
 import * as Yup from "yup"
 import toast from "react-hot-toast"
 
+import { useClientes } from "../hooks/useClientes"
+
 import { Loading } from "../components/Loading"
 
 import "../styles/empresas.scss"
@@ -33,16 +35,9 @@ type SearchObj = {
 }
 
 export function Clientes() {
-  const [loaded, setLoaded] = useState(false)
   const [clientes, setClientes] = useState<Cliente[]>([])
   const [editId, setEditId] = useState(0)
   const [addModal, setAddModal] = useState(false)
-
-  useEffect(() => {
-    if (!addModal) {
-      loadClientes()
-    }
-  }, [addModal])
 
   const search = useFormik({
     initialValues: {
@@ -54,11 +49,11 @@ export function Clientes() {
     },
   })
 
+  const { fetchedClientes, loaded } = useClientes(addModal, search.values.searchCriteria)
+
   useEffect(() => {
-    if (search.values.searchCriteria === "") {
-      loadClientes()
-    }
-  }, [search.values.searchCriteria])
+    setClientes(fetchedClientes)
+  }, [fetchedClientes])
 
   const formik = useFormik({
     initialValues: {
@@ -83,22 +78,6 @@ export function Clientes() {
   const handleCloseAddModal = () => {
     setAddModal(false)
     formik.resetForm()
-  }
-
-  async function loadClientes() {
-    const response = await fetch("api/Clientes")
-    const apiClientes: apiCliente = await response.json()
-    const parsedClientes = Object.entries(apiClientes).map(([key, value]) => {
-      return {
-        id: value.id,
-        cpf: value.cpf,
-        nome: value.nome,
-        email: value.email,
-        dtCriacao: value.dtCriacao,
-      }
-    })
-    setClientes(parsedClientes)
-    setLoaded(true)
   }
 
   //Consulta realizada ao servidor
