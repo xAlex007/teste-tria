@@ -17,6 +17,7 @@
 <code>yarn add react-hot-toast</code>
 
 <h3>Execução:</h3>
+
  1. Em sua máquina deve ter instalado: .NET Framework, Node, Yarn
  1. Clone este repositório
  1. Restaure as dependências .NET com <code>dotnet restore</code>
